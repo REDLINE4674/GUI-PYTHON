@@ -1,0 +1,5 @@
+2026-10-30 11:29:47.839 CST [17420] LOG:  iniciando PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-10-30 11:29:47.845 CST [17420] LOG:  escuchando en la dirección IPv6 «::1», port 5433
+2026-10-30 11:29:47.845 CST [17420] LOG:  escuchando en la dirección IPv4 «127.0.0.1», port 5433
+2026-10-30 11:29:47.897 CST [14700] LOG:  el sistema de bases de datos fue apagado en 2026-10-30 11:28:36 CST
+2026-10-30 11:29:47.921 CST [17420] LOG:  el sistema de bases de datos está listo para aceptar conexiones
