@@ -28,3 +28,18 @@
 2026-10-30 11:50:16.316 CST [17048] LOG:  empezando checkpoint: shutdown immediate
 2026-10-30 11:50:16.327 CST [17048] LOG:  checkpoint completo: escritos 0 búfers (0.0%); 0 archivos WAL añadidos, 0 eliminados, 0 reciclados; write=0.001 s, sync=0.001 s, total=0.013 s; archivos sincronizados=0, más largo=0.000 s, promedio=0.000 s; distancia=0 kB, estimación=7 kB; lsn=0/1A36DF0, lsn de redo=0/1A36DF0
 2026-10-30 11:50:16.336 CST [14332] LOG:  el sistema de bases de datos está apagado
+2026-10-30 11:50:19.706 CST [22220] LOG:  iniciando PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-10-30 11:50:19.711 CST [22220] LOG:  escuchando en la dirección IPv6 «::1», port 5433
+2026-10-30 11:50:19.711 CST [22220] LOG:  escuchando en la dirección IPv4 «127.0.0.1», port 5433
+2026-10-30 11:50:19.868 CST [26740] LOG:  el sistema de bases de datos fue apagado en 2026-10-30 11:50:16 CST
+2026-10-30 11:50:19.895 CST [22220] LOG:  el sistema de bases de datos está listo para aceptar conexiones
+2026-10-30 11:55:19.764 CST [36232] LOG:  empezando checkpoint: time
+2026-10-30 11:55:20.782 CST [36232] LOG:  checkpoint completo: escritos 12 búfers (0.1%); 0 archivos WAL añadidos, 0 eliminados, 0 reciclados; write=0.978 s, sync=0.022 s, total=1.020 s; archivos sincronizados=10, más largo=0.011 s, promedio=0.003 s; distancia=10 kB, estimación=10 kB; lsn=0/1A397C8, lsn de redo=0/1A39770
+2026-10-30 11:56:22.618 CST [30356] LOG:  no se pudo recibir datos del cliente: An existing connection was forcibly closed by the remote host.
+	
+2026-10-30 11:56:22.618 CST [1312] LOG:  no se pudo recibir datos del cliente: An existing connection was forcibly closed by the remote host.
+	
+2026-10-30 11:56:22.619 CST [24952] LOG:  no se pudo recibir datos del cliente: An existing connection was forcibly closed by the remote host.
+	
+2026-10-30 11:56:22.620 CST [34564] LOG:  no se pudo recibir datos del cliente: An existing connection was forcibly closed by the remote host.
+	
