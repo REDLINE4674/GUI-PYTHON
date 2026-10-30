@@ -43,3 +43,10 @@
 	
 2026-10-30 11:56:22.620 CST [34564] LOG:  no se pudo recibir datos del cliente: An existing connection was forcibly closed by the remote host.
 	
+2026-10-30 11:58:36.783 CST [22220] LOG:  se recibió petición de apagado rápido
+2026-10-30 11:58:36.787 CST [22220] LOG:  abortando transacciones activas
+2026-10-30 11:58:36.793 CST [22220] LOG:  proceso ayudante «logical replication launcher» (PID 33624) terminó con código de salida 1
+2026-10-30 11:58:36.794 CST [36232] LOG:  apagando
+2026-10-30 11:58:36.796 CST [36232] LOG:  empezando checkpoint: shutdown immediate
+2026-10-30 11:58:36.819 CST [36232] LOG:  checkpoint completo: escritos 5 búfers (0.0%); 0 archivos WAL añadidos, 0 eliminados, 0 reciclados; write=0.006 s, sync=0.006 s, total=0.025 s; archivos sincronizados=4, más largo=0.002 s, promedio=0.002 s; distancia=0 kB, estimación=9 kB; lsn=0/1A39878, lsn de redo=0/1A39878
+2026-10-30 11:58:36.831 CST [22220] LOG:  el sistema de bases de datos está apagado
