@@ -5,3 +5,9 @@
 2026-10-30 11:29:47.921 CST [17420] LOG:  el sistema de bases de datos está listo para aceptar conexiones
 2026-10-30 11:34:47.891 CST [18936] LOG:  empezando checkpoint: time
 2026-10-30 11:36:41.474 CST [18936] LOG:  checkpoint completo: escritos 1028 búfers (6.3%); 0 archivos WAL añadidos, 0 eliminados, 0 reciclados; write=113.215 s, sync=0.356 s, total=113.585 s; archivos sincronizados=313, más largo=0.005 s, promedio=0.002 s; distancia=4863 kB, estimación=4863 kB; lsn=0/1A36CC8, lsn de redo=0/1A34AB8
+2026-10-30 11:47:26.635 CST [17420] LOG:  proceso de servidor (PID 9064) fue terminado por una excepción 0xC000013A
+2026-10-30 11:47:26.635 CST [17420] DETALLE:  El proceso que falló estaba ejecutando: SELECT * FROM usuarios;
+2026-10-30 11:47:26.635 CST [17420] HINT:  Vea el archivo «ntstatus.h» para una descripción del valor hexadecimal.
+2026-10-30 11:47:26.635 CST [17420] LOG:  terminando todos los otros procesos de servidor activos
+2026-10-30 11:47:26.652 CST [17420] LOG:  todos los procesos fueron terminados; reinicializando
+^C
