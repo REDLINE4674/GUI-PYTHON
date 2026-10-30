@@ -21,7 +21,6 @@ def iniciar_sesion():
 
     try:
 
-       
         # CONECTAR CON POSTGRESQL
        
         conexion = psycopg.connect(
@@ -79,7 +78,6 @@ def iniciar_sesion():
             f"No se pudo conectar con PostgreSQL:\n\n{error}"
         )
 
-
 # VENTANA
 
 ventana = tk.Tk()
@@ -96,7 +94,6 @@ titulo = tk.Label(
 )
 
 titulo.pack(pady=20)
-
 
 # USUARIO
 
@@ -115,7 +112,6 @@ entrada_usuario.pack()
 
 # CONTRASEÑA
 
-
 tk.Label(
     ventana,
     text="Contraseña:"
@@ -128,8 +124,6 @@ entrada_password = tk.Entry(
 )
 
 entrada_password.pack()
-
-
 
 # BOTÓN
 
