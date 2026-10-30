@@ -10,4 +10,21 @@
 2026-10-30 11:47:26.635 CST [17420] HINT:  Vea el archivo «ntstatus.h» para una descripción del valor hexadecimal.
 2026-10-30 11:47:26.635 CST [17420] LOG:  terminando todos los otros procesos de servidor activos
 2026-10-30 11:47:26.652 CST [17420] LOG:  todos los procesos fueron terminados; reinicializando
-^C
+^C2026-10-30 11:50:01.850 CST [14332] LOG:  iniciando PostgreSQL 17.11 on x86_64-windows, compiled by msvc-19.44.35228, 64-bit
+2026-10-30 11:50:01.855 CST [14332] LOG:  escuchando en la dirección IPv6 «::1», port 5433
+2026-10-30 11:50:01.855 CST [14332] LOG:  escuchando en la dirección IPv4 «127.0.0.1», port 5433
+2026-10-30 11:50:01.903 CST [30844] LOG:  el sistema de bases de datos fue interrumpido; última vez en funcionamiento en 2026-10-30 11:36:41 CST
+2026-10-30 11:50:02.232 CST [30844] LOG:  el sistema de bases de datos no fue apagado apropiadamente; se está efectuando la recuperación automática
+2026-10-30 11:50:02.237 CST [30844] LOG:  redo comienza en 0/1A34AB8
+2026-10-30 11:50:02.242 CST [30844] LOG:  largo de registro no válido en 0/1A36D78: se esperaba al menos 24, se obtuvo 0
+2026-10-30 11:50:02.242 CST [30844] LOG:  redo listo en 0/1A36D40 utilización del sistema: CPU: usuario: 0.01 s, sistema: 0.00 s, transcurrido: 0.00 s
+2026-10-30 11:50:02.249 CST [17048] LOG:  empezando checkpoint: end-of-recovery immediate wait
+2026-10-30 11:50:02.277 CST [17048] LOG:  checkpoint completo: escritos 9 búfers (0.1%); 0 archivos WAL añadidos, 0 eliminados, 0 reciclados; write=0.006 s, sync=0.013 s, total=0.032 s; archivos sincronizados=7, más largo=0.003 s, promedio=0.002 s; distancia=8 kB, estimación=8 kB; lsn=0/1A36D78, lsn de redo=0/1A36D78
+2026-10-30 11:50:02.303 CST [14332] LOG:  el sistema de bases de datos está listo para aceptar conexiones
+2026-10-30 11:50:16.306 CST [14332] LOG:  se recibió petición de apagado rápido
+2026-10-30 11:50:16.309 CST [14332] LOG:  abortando transacciones activas
+2026-10-30 11:50:16.314 CST [14332] LOG:  proceso ayudante «logical replication launcher» (PID 5992) terminó con código de salida 1
+2026-10-30 11:50:16.315 CST [17048] LOG:  apagando
+2026-10-30 11:50:16.316 CST [17048] LOG:  empezando checkpoint: shutdown immediate
+2026-10-30 11:50:16.327 CST [17048] LOG:  checkpoint completo: escritos 0 búfers (0.0%); 0 archivos WAL añadidos, 0 eliminados, 0 reciclados; write=0.001 s, sync=0.001 s, total=0.013 s; archivos sincronizados=0, más largo=0.000 s, promedio=0.000 s; distancia=0 kB, estimación=7 kB; lsn=0/1A36DF0, lsn de redo=0/1A36DF0
+2026-10-30 11:50:16.336 CST [14332] LOG:  el sistema de bases de datos está apagado
