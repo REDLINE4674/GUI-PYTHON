@@ -1,101 +1,284 @@
-
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 import psycopg2
 
 
-def conectar_postgres(usuario, password):
-
-    try:
-        conexion = psycopg2.connect(
-            host="localhost",
-            port="5432",
-            database="postgres",
-            user=usuario,
-            password=password
-        )
-
-        return conexion
-
-    except psycopg2.Error as error:
-        messagebox.showerror(
-            "Error de conexión",
-            f"No se pudo conectar:\n{error}"
-        )
-        return None
+# VENTANA PRINCIPAL
+ventana = tk.Tk()
+ventana.title("Administrador PostgreSQL")
+ventana.geometry("800x500")
 
 
+# VARIABLES
+conexion = None
+usuario = "admin"
+password = "1234"
+
+
+# FUNCION PARA INICIAR SESION
 def iniciar_sesion():
 
-    usuario = entrada_usuario.get()
-    password = entrada_password.get()
+    global conexion, usuario, password
 
-    if not usuario or not password:
+    usuario = caja_usuario.get()
+    password = caja_password.get()
+
+    try:
+
+        conexion = psycopg2.connect(
+            host="localhost",
+            database="NucleoDeDiagnostico",
+            user=usuario,
+            password=password,
+            port="5433"
+        )
+
+        messagebox.showinfo(
+            "Conexion exitosa",
+            "Bienvenido " + usuario
+        )
+
+        mostrar_menu()
+
+    except:
+
+        messagebox.showerror(
+            "Error",
+            "Usuario o contraseña incorrectos"
+        )
+
+
+# FUNCION PARA MOSTRAR MENU
+def mostrar_menu():
+
+    # OCULTAR LOGIN
+    login.destroy()
+
+    # TITULO
+    tk.Label(
+        ventana,
+        text="Administrador PostgreSQL",
+        font=("Arial", 18, "bold")
+    ).pack(pady=10)
+
+    tk.Label(
+        ventana,
+        text="Usuario conectado: " + usuario
+    ).pack()
+
+    # SELECCIONAR TABLA
+    global lista_tablas
+
+    lista_tablas = ttk.Combobox(
+        ventana,
+        state="readonly",
+        width=30
+    )
+    lista_tablas.pack(pady=10)
+
+    lista_tablas.bind(
+        "<<ComboboxSelected>>",
+        consultar_datos
+    )
+
+    # BOTON INSERTAR
+    tk.Button(
+        ventana,
+        text="Insertar tupla",
+        command=insertar_tupla
+    ).pack(pady=5)
+
+    # TABLA PARA MOSTRAR DATOS
+    global tabla
+
+    tabla = ttk.Treeview(ventana, show="headings")
+    tabla.pack(fill="both", expand=True, padx=10, pady=10)
+
+    # CARGAR TABLAS
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_type = 'BASE TABLE'
+    """)
+
+    tablas = cursor.fetchall()
+
+    lista_tablas["values"] = [fila[0] for fila in tablas]
+
+    cursor.close()
+
+
+# FUNCION PARA CONSULTAR DATOS
+def consultar_datos(event=None):
+
+    nombre_tabla = lista_tablas.get()
+
+    cursor = conexion.cursor()
+
+    cursor.execute(
+        "SELECT * FROM " + nombre_tabla
+    )
+
+    columnas = [columna[0] for columna in cursor.description]
+
+    registros = cursor.fetchall()
+
+    tabla.delete(*tabla.get_children())
+
+    tabla["columns"] = columnas
+
+    for columna in columnas:
+
+        tabla.heading(columna, text=columna)
+        tabla.column(columna, width=120)
+
+    for registro in registros:
+
+        tabla.insert("", "end", values=registro)
+
+    cursor.close()
+
+
+# FUNCION PARA INSERTAR TUPLAS
+def insertar_tupla():
+
+    nombre_tabla = lista_tablas.get()
+
+    if nombre_tabla == "":
         messagebox.showwarning(
-            "Campos vacíos",
-            "Ingresa usuario y contraseña"
+            "Aviso",
+            "Selecciona una tabla"
         )
         return
 
-    conexion = conectar_postgres(usuario, password)
+    cursor = conexion.cursor()
 
-    if conexion:
-        conexion.close()
-        ventana_login.destroy()
-        abrir_menu(usuario)
+    cursor.execute("""
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+        AND table_name = %s
+        AND is_generated = 'NEVER'
+        AND is_identity = 'NO'
+        ORDER BY ordinal_position
+    """, (nombre_tabla,))
 
+    columnas = cursor.fetchall()
 
-def abrir_menu(usuario):
+    cursor.close()
 
-    menu = tk.Tk()
-    menu.title("Menú principal")
-    menu.geometry("600x400")
+    # NUEVA VENTANA
+    nueva = tk.Toplevel(ventana)
+    nueva.title("Insertar tupla")
 
-    tk.Label(
-        menu,
-        text=f"Bienvenido: {usuario}",
-        font=("Arial", 18, "bold")
-    ).pack(pady=30)
+    entradas = []
+
+    for columna in columnas:
+
+        tk.Label(
+            nueva,
+            text=columna[0]
+        ).pack()
+
+        entrada = tk.Entry(nueva)
+        entrada.pack(pady=3)
+
+        entradas.append(entrada)
+
+    # GUARDAR DATOS
+    def guardar():
+
+        valores = []
+        nombres = []
+
+        for i in range(len(columnas)):
+
+            valor = entradas[i].get()
+
+            if valor != "":
+                nombres.append(columnas[i][0])
+                valores.append(valor)
+
+        try:
+
+            cursor = conexion.cursor()
+
+            if len(nombres) > 0:
+
+                campos = ", ".join(nombres)
+                signos = ", ".join(["%s"] * len(valores))
+
+                consulta = (
+                    "INSERT INTO " + nombre_tabla +
+                    " (" + campos + ") VALUES (" + signos + ")"
+                )
+
+                cursor.execute(consulta, valores)
+
+            else:
+
+                cursor.execute(
+                    "INSERT INTO " + nombre_tabla +
+                    " DEFAULT VALUES"
+                )
+
+            conexion.commit()
+
+            cursor.close()
+
+            messagebox.showinfo(
+                "Correcto",
+                "Tupla insertada correctamente"
+            )
+
+            nueva.destroy()
+            consultar_datos()
+
+        except Exception as error:
+
+            conexion.rollback()
+
+            messagebox.showerror(
+                "Error",
+                str(error)
+            )
 
     tk.Button(
-        menu,
-        text="Cerrar sesión",
-        command=menu.destroy
-    ).pack(pady=20)
-
-    menu.mainloop()
+        nueva,
+        text="Guardar",
+        command=guardar
+    ).pack(pady=15)
 
 
-# VENTANA LOGIN
-
-ventana_login = tk.Tk()
-ventana_login.title("Login PostgreSQL")
-ventana_login.geometry("350x300")
-ventana_login.resizable(False, False)
+# FORMULARIO DE LOGIN
+login = tk.Frame(ventana)
+login.pack(expand=True)
 
 tk.Label(
-    ventana_login,
-    text="Inicio de sesión",
+    login,
+    text="INICIO DE SESION",
     font=("Arial", 18, "bold")
-).pack(pady=20)
+).pack(pady=15)
 
-tk.Label(ventana_login, text="Usuario").pack()
+tk.Label(login, text="Usuario").pack()
 
-entrada_usuario = tk.Entry(ventana_login)
-entrada_usuario.pack(pady=5)
+caja_usuario = tk.Entry(login)
+caja_usuario.pack(pady=5)
 
-tk.Label(ventana_login, text="Contraseña").pack()
+tk.Label(login, text="Contraseña").pack()
 
-entrada_password = tk.Entry(
-    ventana_login,
-    show="*"
-)
-entrada_password.pack(pady=5)
+caja_password = tk.Entry(login, show="*")
+caja_password.pack(pady=5)
 
 tk.Button(
-    ventana_login,
-    text="Iniciar sesión",
+    login,
+    text="Conectar",
     command=iniciar_sesion
-).pack(pady=25)
+).pack(pady=15)
 
-ventana_login.mainloop()
+
+# INICIAR PROGRAMA
+ventana.mainloop()
