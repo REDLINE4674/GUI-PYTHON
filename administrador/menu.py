@@ -9,7 +9,7 @@ from consultas import mostrar_datos
 from insertar import abrir_ventana_insertar
 
 
-def mostrar_menu(ventana, conexion, usuario, rol):
+def mostrar_menu(ventana, conexion, usuario, rol, al_cerrar_sesion):
 
     ventana.title("Nucleo De Diagnostico")
     ventana.configure(bg="#F0F2F5")
@@ -21,6 +21,28 @@ def mostrar_menu(ventana, conexion, usuario, rol):
     def es_tabla_pacientes(nombre_tabla):
         nombre_normalizado = str(nombre_tabla).strip().lower()
         return nombre_normalizado in ("paciente", "pacientes")
+
+    barra_superior = tk.Frame(ventana, bg="#1F4E79")
+    barra_superior.pack(fill="x", padx=12, pady=(12, 0))
+
+    tk.Label(
+        barra_superior,
+        text=f"Bienvenido  {usuario}",
+        font=("Arial", 12, "bold"),
+        bg="#1F4E79",
+        fg="white"
+    ).pack(side="left", padx=15, pady=10)
+
+    tk.Button(
+        barra_superior,
+        text="Cerrar sesión",
+        command=al_cerrar_sesion,
+        bg="white",
+        fg="#1F4E79",
+        relief="flat",
+        font=("Arial", 10, "bold"),
+        cursor="hand2"
+    ).pack(side="right", padx=10, pady=5)
 
     # CONTENEDOR PRINCIPAL
 
@@ -103,6 +125,7 @@ def mostrar_menu(ventana, conexion, usuario, rol):
 
     def mostrar_inicio():
 
+        boton_regresar.pack_forget()
         tabla_seleccionada["nombre"] = None
 
         limpiar_panel()
@@ -179,6 +202,17 @@ def mostrar_menu(ventana, conexion, usuario, rol):
             fg="#888888"
         ).pack(pady=5)
 
+    boton_regresar = tk.Button(
+        barra_superior,
+        text="Regresar al menú",
+        command=mostrar_inicio,
+        bg="#E8EEF5",
+        fg="#1F4E79",
+        relief="flat",
+        font=("Arial", 10),
+        cursor="hand2"
+    )
+
     # VISTA DE TABLAS
 
     def seleccionar_tabla(nombre):
@@ -190,6 +224,9 @@ def mostrar_menu(ventana, conexion, usuario, rol):
                 parent=ventana
             )
             return
+
+        if not boton_regresar.winfo_manager():
+            boton_regresar.pack(side="right", padx=(0, 10), pady=5)
 
         tabla_seleccionada["nombre"] = nombre
 
@@ -302,19 +339,6 @@ def mostrar_menu(ventana, conexion, usuario, rol):
             pady=15
         )
 
-        # Regresar al menú principal
-        tk.Button(
-            botones,
-            text="Regresar al menú principal",
-            command=mostrar_inicio,
-            width=25,
-            bg="#E8EEF5",
-            fg="#1F4E79",
-            relief="flat",
-            font=("Arial", 10),
-            cursor="hand2"
-        ).pack(side="left")
-
         tk.Button(
             botones,
             text="Consultar registros",
@@ -328,7 +352,9 @@ def mostrar_menu(ventana, conexion, usuario, rol):
         ).pack(side="left", padx=5)
 
         # Insertar registro
-        if es_administrador:
+        if es_administrador or (
+            es_usuario_normal and es_tabla_pacientes(nombre)
+        ):
             tk.Button(
                 botones,
                 text="Insertar registro",

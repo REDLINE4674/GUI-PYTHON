@@ -16,7 +16,8 @@ def iniciar_aplicacion(conexion, usuario, rol):
         ventana,
         conexion,
         usuario,
-        rol
+        rol,
+        cerrar_sesion
     )
 
 
@@ -32,6 +33,23 @@ def cerrar_aplicacion():
 
 # Variable para guardar la conexión
 conexion_actual = None
+
+
+def cerrar_sesion():
+
+    global conexion_actual
+
+    if conexion_actual:
+        conexion_actual.close()
+        conexion_actual = None
+
+    for widget in ventana.winfo_children():
+        widget.destroy()
+
+    mostrar_login(
+        ventana,
+        conexion_exitosa
+    )
 
 
 # Recibir conexión desde el login

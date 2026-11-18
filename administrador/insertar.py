@@ -7,6 +7,9 @@ from conexion import obtener_columnas, insertar_registro
 
 def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
 
+    estilo = None
+    tema_anterior = None
+
     try:
 
         columnas = obtener_columnas(conexion, nombre_tabla)
@@ -26,12 +29,33 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
 
         # Estilos
         estilo = ttk.Style(nueva)
+        tema_anterior = estilo.theme_use()
+        estilo.theme_use("clam")
 
         estilo.configure(
             "Formulario.TCombobox",
-            padding=7,
-            font=("Arial", 10)
+            padding=(0, 0),
+            font=("Arial", 10),
+            fieldbackground="white",
+            foreground="#333333",
+            background="white",
+            bordercolor="#333333",
+            lightcolor="#333333",
+            darkcolor="#333333",
+            borderwidth=1,
+            relief="solid"
         )
+        estilo.map(
+            "Formulario.TCombobox",
+            fieldbackground=[("readonly", "white")],
+            foreground=[("readonly", "#333333")]
+        )
+
+        def cerrar():
+            nueva.destroy()
+            estilo.theme_use(tema_anterior)
+
+        nueva.protocol("WM_DELETE_WINDOW", cerrar)
 
         # ENCABEZADO
 
@@ -137,6 +161,11 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
             ajustar_ancho
         )
 
+        def desplazar_formulario(event):
+            canvas.yview_scroll(int(-event.delta / 120), "units")
+
+        nueva.bind("<MouseWheel>", desplazar_formulario)
+
         # CAMPOS DEL FORMULARIO
 
         entradas = []
@@ -157,6 +186,9 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
                 padx=20,
                 pady=9
             )
+            campo.grid_columnconfigure(0, minsize=150)
+            campo.grid_columnconfigure(1, weight=1)
+            campo.grid_rowconfigure(0, minsize=30)
 
             # Etiqueta
             tk.Label(
@@ -164,8 +196,10 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
                 text=nombre_columna.replace("_", " ").capitalize(),
                 font=("Arial", 10, "bold"),
                 bg="white",
-                fg="#333333"
-            ).pack(anchor="w", pady=(0, 5))
+                fg="#333333",
+                anchor="w",
+                wraplength=130
+            ).grid(row=0, column=0, sticky="w", padx=(0, 12))
 
             if nombre_normalizado == "sexo":
 
@@ -200,8 +234,10 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
                     borderwidth=1
                 )
 
-            entrada.pack(
-                fill="x",
+            entrada.grid(
+                row=0,
+                column=1,
+                sticky="nsew",
                 ipady=5
             )
 
@@ -209,7 +245,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
 
         def cancelar():
 
-            nueva.destroy()
+            cerrar()
 
         #Guardar
 
@@ -242,7 +278,7 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
                     parent=nueva
                 )
 
-                nueva.destroy()
+                cerrar()
 
                 # Actualizar la tabla visual
                 actualizar()
@@ -299,6 +335,9 @@ def abrir_ventana_insertar(ventana, conexion, nombre_tabla, actualizar):
         ).pack(side="right")
 
     except Exception as error:
+
+        if estilo is not None and tema_anterior is not None:
+            estilo.theme_use(tema_anterior)
 
         messagebox.showerror(
             "Error",

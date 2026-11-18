@@ -13,6 +13,7 @@ Este proyecto permite:
 - Consultar los registros de una tabla seleccionada bajo demanda.
 - Mostrar los datos en una interfaz gráfica.
 - Insertar nuevas filas en tablas seleccionadas mediante formularios generados automáticamente.
+- Mostrar el nombre del usuario conectado y volver al inicio de sesión sin cerrar la aplicación.
 
 La lógica de conexión a la base de datos se encuentra en `administrador/conexion.py` y la interfaz gráfica principal se controla desde `administrador/main.py`.
 
@@ -113,15 +114,16 @@ La aplicación abrirá una ventana de inicio de sesión. Al validar el usuario e
 1. Ingresa tu nombre de usuario y contraseña.
 2. Selecciona una tabla del menú lateral.
 3. Pulsa **Consultar registros** para cargar los datos y ver el total encontrado. La tabla no aparece hasta solicitar la consulta.
-4. Si tienes rol de administrador, pulsa **Insertar registro** para agregar una fila.
+4. Pulsa **Insertar registro** para agregar una fila, si tu perfil tiene permiso en la tabla seleccionada.
 5. Pulsa **Regresar al menú principal** para volver a la pantalla de inicio.
+6. Pulsa **Cerrar sesión** para volver al inicio de sesión sin terminar la aplicación.
 
 ### Perfiles
 
 La tabla `usuarios` debe tener las columnas `nombre`, `contrasena` y `rol`.
 
 - `rol = 1`: administrador. Puede consultar todas las tablas públicas disponibles y tiene habilitada la inserción de registros.
-- `rol = 2`: usuario normal. Solo puede consultar la tabla `pacientes` (o `paciente`, si así se llama en la base de datos); no tiene habilitada la inserción.
+- `rol = 2`: usuario normal. Solo puede consultar e insertar registros en la tabla `pacientes` (o `paciente`, si así se llama en la base de datos).
 
 La aplicación actualmente no ofrece operaciones para editar o eliminar registros.
 
@@ -129,6 +131,7 @@ La aplicación actualmente no ofrece operaciones para editar o eliminar registro
 
 - La aplicación está enfocada a tablas dentro del esquema `public`.
 - Los datos se muestran en una tabla visual de Tkinter.
+- El formulario de inserción permite desplazarse verticalmente y presenta las etiquetas e inputs alineados.
 - La lógica de inserción evita columnas generadas o de identidad, según la consulta SQL utilizada.
 - La base de datos debe estar disponible antes de ejecutar la aplicación.
 - La configuración de conexión a PostgreSQL se encuentra en `administrador/conexion.py`.
