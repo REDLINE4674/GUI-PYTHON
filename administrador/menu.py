@@ -1,5 +1,9 @@
+
 import tkinter as tk
 from tkinter import ttk, messagebox
+from pathlib import Path
+from PIL import Image, ImageTk
+
 from conexion import obtener_tablas
 from consultas import mostrar_datos
 from insertar import abrir_ventana_insertar
@@ -7,200 +11,349 @@ from insertar import abrir_ventana_insertar
 
 def mostrar_menu(ventana, conexion, usuario):
 
-    # Tamaños independientes para el menú y para la vista de cada sección
-    TAMANO_MENU = "460x450"
-    TAMANO_SECCION = "950x650"
+    ventana.title("Nucleo De Diagnostico")
+    ventana.configure(bg="#F0F2F5")
 
-    # Aplicar tamaño exclusivo de la ventana del menú
-    ventana.geometry(TAMANO_MENU)
+    # CONTENEDOR PRINCIPAL
 
-    # Encabezado fijo de la aplicación
-    encabezado = tk.Frame(ventana)
-    encabezado.pack(fill="x", padx=15, pady=(10, 5))
+    contenido = tk.Frame(ventana, bg="#F0F2F5")
+    contenido.pack(fill="both", expand=True)
 
-    tk.Label(
-        encabezado,
-        text="Administrador PostgreSQL",
-        font=("Arial", 16, "bold")
-    ).pack()
+    # MENU LATERAL
 
-    tk.Label(
-        encabezado,
-        text="Usuario conectado: " + usuario,
-        fg="#555555"
-    ).pack()
-
-    # Contenedor principal donde alternan el menú y la sección activa
-    contenedor_principal = tk.Frame(ventana)
-    contenedor_principal.pack(fill="both", expand=True, padx=15, pady=10)
-
-    # VISTA 1: MENÚ DE SECCIONES
-    frame_menu = tk.Frame(contenedor_principal, relief="groove", borderwidth=1)
-    frame_menu.pack(fill="both", expand=True)
-
-    tk.Label(
-        frame_menu,
-        text="SECCIONES DISPONIBLES",
-        font=("Arial", 13, "bold")
-    ).pack(pady=(18, 5))
-
-    frame_botones_menu = tk.Frame(frame_menu)
-    frame_botones_menu.pack(pady=10)
-
-    # VISTA 2: PANEL DE LA SECCIÓN SELECCIONADA (oculta al inicio)
-    frame_seccion = tk.Frame(contenedor_principal, relief="groove", borderwidth=1)
-
-    # Barra superior con botón de regreso y título de la sección
-    barra_superior = tk.Frame(frame_seccion)
-    barra_superior.pack(fill="x", padx=15, pady=12)
-
-    def regresar_al_menu():
-        seccion_actual["nombre"] = None
-        frame_resultados.pack_forget()
-        frame_seccion.pack_forget()
-        ventana.geometry(TAMANO_MENU)
-        frame_menu.pack(fill="both", expand=True)
-
-    tk.Button(
-        barra_superior,
-        text="← Regresar al menú",
-        command=regresar_al_menu,
-        bg="#555555",
-        fg="white",
-        font=("Arial", 10, "bold"),
-        padx=10
-    ).pack(side="left")
-
-    titulo_seccion = tk.Label(
-        barra_superior,
-        text="",
-        font=("Arial", 15, "bold")
-    )
-    titulo_seccion.pack(side="left", padx=20)
-
-    # Botones de acción dentro de la sección
-    frame_acciones = tk.Frame(frame_seccion)
-    frame_acciones.pack(pady=10)
-
-    # Contenedor de resultados (oculto hasta presionar "Consultas generales")
-    frame_resultados = tk.Frame(frame_seccion)
-
-    etiqueta_total = tk.Label(
-        frame_resultados,
-        text="Total de registros encontrados: 0",
-        font=("Arial", 11, "bold"),
-        anchor="w"
-    )
-    etiqueta_total.pack(fill="x", padx=15, pady=(5, 5))
-
-    frame_tabla = tk.Frame(frame_resultados)
-    frame_tabla.pack(fill="both", expand=True, padx=15, pady=(0, 15))
-
-    scroll_y = ttk.Scrollbar(frame_tabla, orient="vertical")
-    scroll_x = ttk.Scrollbar(frame_tabla, orient="horizontal")
-
-    tabla_visual = ttk.Treeview(
-        frame_tabla,
-        show="headings",
-        yscrollcommand=scroll_y.set,
-        xscrollcommand=scroll_x.set
+    menu = tk.Frame(
+        contenido,
+        bg="white",
+        width=210,
+        relief="solid",
+        borderwidth=1
     )
 
-    scroll_y.config(command=tabla_visual.yview)
-    scroll_x.config(command=tabla_visual.xview)
+    menu.pack(
+        side="left",
+        fill="y",
+        padx=(12, 6),
+        pady=12
+    )
 
-    scroll_y.pack(side="right", fill="y")
-    scroll_x.pack(side="bottom", fill="x")
-    tabla_visual.pack(side="left", fill="both", expand=True)
+    menu.pack_propagate(False)
 
-    # Estado de la sección seleccionada
-    seccion_actual = {"nombre": None}
+    # Encabezado del menú lateral
+    tk.Label(
+        menu,
+        text="CONSULTAS GENERALES",
+        font=("Arial", 12, "bold"),
+        bg="white",
+        fg="#1F4E79"
+    ).pack(pady=20)
 
-    def ejecutar_consulta_general():
-        nombre = seccion_actual["nombre"]
-        if nombre is None:
-            return
+    # Separador
+    ttk.Separator(
+        menu,
+        orient="horizontal"
+    ).pack(fill="x", padx=12, pady=5)
 
-        frame_resultados.pack(fill="both", expand=True)
-        mostrar_datos(
-            conexion,
-            tabla_visual,
-            etiqueta_total,
-            nombre
+    # Contenedor de botones de tablas
+    contenedor_botones = tk.Frame(
+        menu,
+        bg="white"
+    )
+
+    contenedor_botones.pack(
+        fill="both",
+        expand=True,
+        padx=8,
+        pady=10
+    )
+
+    # PANEL DE CONTENIDO
+
+    panel = tk.Frame(
+        contenido,
+        bg="white",
+        relief="solid",
+        borderwidth=1
+    )
+
+    panel.pack(
+        side="right",
+        fill="both",
+        expand=True,
+        padx=(6, 12),
+        pady=12
+    )
+
+    # Variable para recordar la tabla seleccionada
+    tabla_seleccionada = {"nombre": None}
+
+    def limpiar_panel():
+
+        for widget in panel.winfo_children():
+            widget.destroy()
+
+    # MENU PRINCIPAL
+
+    def mostrar_inicio():
+
+        tabla_seleccionada["nombre"] = None
+
+        limpiar_panel()
+
+        inicio = tk.Frame(
+            panel,
+            bg="white"
         )
 
-    def abrir_insercion():
-        nombre = seccion_actual["nombre"]
-        if nombre is None:
-            return
-
-        abrir_ventana_insertar(
-            ventana,
-            conexion,
-            nombre,
-            ejecutar_consulta_general
+        inicio.pack(
+            fill="both",
+            expand=True
         )
 
-    tk.Button(
-        frame_acciones,
-        text="Consultas generales",
-        command=ejecutar_consulta_general,
-        width=22,
-        bg="#1f6aa5",
-        fg="white",
-        font=("Arial", 10, "bold")
-    ).pack(side="left", padx=10)
+        # Imagen
+        try:
 
-    tk.Button(
-        frame_acciones,
-        text="Insertar nuevo registro",
-        command=abrir_insercion,
-        width=22,
-        bg="#2e7d32",
-        fg="white",
-        font=("Arial", 10, "bold")
-    ).pack(side="left", padx=10)
+            ruta_imagen = Path(__file__).resolve().parent / "imagenes" / "nd.png"
+            imagen = Image.open(ruta_imagen)
+            imagen = imagen.resize((160, 160))
 
-    # Cambiar del menú hacia la sección elegida
-    def seleccionar_seccion(nombre):
-        seccion_actual["nombre"] = nombre
-        titulo_seccion.config(text=f"Sección: {nombre.capitalize()}")
+            logo = ImageTk.PhotoImage(imagen)
 
-        # Reiniciar vista previa de la tabla
-        tabla_visual.delete(*tabla_visual.get_children())
-        tabla_visual["columns"] = ()
-        etiqueta_total.config(text="Total de registros encontrados: 0")
-        frame_resultados.pack_forget()
+            etiqueta_imagen = tk.Label(
+                inicio,
+                image=logo,
+                bg="white"
+            )
 
-        # Ocultar menú, ampliar ventana y mostrar la sección
-        frame_menu.pack_forget()
-        ventana.geometry(TAMANO_SECCION)
-        frame_seccion.pack(fill="both", expand=True)
+            etiqueta_imagen.image = logo
+            etiqueta_imagen.pack(pady=(50, 15))
 
-    # Cargar dinámicamente las tablas de PostgreSQL como botones en el menú
+        except Exception:
+
+            tk.Label(
+                inicio,
+                text="NÚCLEO",
+                font=("Arial", 30, "bold"),
+                fg="#1F4E79",
+                bg="white"
+            ).pack(pady=(70, 15))
+
+        # Usuario conectado
+        tk.Label(
+            inicio,
+            text=f"Usuario: {usuario}",
+            font=("Arial", 21, "bold"),
+            bg="white",
+            fg="#333333"
+        ).pack(pady=10)
+
+        # Mensaje de bienvenida
+        tk.Label(
+            inicio,
+            text="Bienvenido al sistema de administración de datos.",
+            font=("Arial", 11),
+            bg="white",
+            fg="#666666"
+        ).pack(pady=15)
+
+        tk.Label(
+            inicio,
+            text="Selecciona una tabla del menú lateral para comenzar.",
+            font=("Arial", 10),
+            bg="white",
+            fg="#888888"
+        ).pack(pady=5)
+
+    # VISTA DE TABLAS
+
+    def seleccionar_tabla(nombre):
+
+        tabla_seleccionada["nombre"] = nombre
+
+        limpiar_panel()
+
+        # Encabezado de la tabla
+        encabezado_tabla = tk.Frame(
+            panel,
+            bg="white"
+        )
+
+        encabezado_tabla.pack(
+            fill="x",
+            padx=20,
+            pady=15
+        )
+
+        titulo_tabla = tk.Label(
+            encabezado_tabla,
+            text=f"Tabla: {nombre.capitalize()}",
+            font=("Arial", 18, "bold"),
+            bg="white",
+            fg="#1F4E79"
+        )
+
+        titulo_tabla.pack(side="left")
+
+        # Contenedor de registros
+        contenedor_tabla = tk.Frame(
+            panel,
+            bg="white"
+        )
+
+        contenedor_tabla.pack(
+            fill="both",
+            expand=True,
+            padx=20,
+            pady=10
+        )
+
+        # Tabla visual
+        tabla_visual = ttk.Treeview(
+            contenedor_tabla,
+            show="headings"
+        )
+
+        # Barra vertical
+        scroll_vertical = ttk.Scrollbar(
+            contenedor_tabla,
+            orient="vertical",
+            command=tabla_visual.yview
+        )
+
+        # Barra horizontal
+        scroll_horizontal = ttk.Scrollbar(
+            contenedor_tabla,
+            orient="horizontal",
+            command=tabla_visual.xview
+        )
+
+        tabla_visual.configure(
+            yscrollcommand=scroll_vertical.set,
+            xscrollcommand=scroll_horizontal.set
+        )
+
+        # Distribución de la tabla
+        tabla_visual.grid(
+            row=0,
+            column=0,
+            sticky="nsew"
+        )
+
+        scroll_vertical.grid(
+            row=0,
+            column=1,
+            sticky="ns"
+        )
+
+        scroll_horizontal.grid(
+            row=1,
+            column=0,
+            sticky="ew"
+        )
+
+        contenedor_tabla.grid_rowconfigure(0, weight=1)
+        contenedor_tabla.grid_columnconfigure(0, weight=1)
+
+        # ACTUALIZAR REGISTROS
+
+        def actualizar():
+
+            nombre_actual = tabla_seleccionada["nombre"]
+
+            if nombre_actual is not None:
+
+                mostrar_datos(
+                    conexion,
+                    tabla_visual,
+                    titulo_tabla,
+                    nombre_actual
+                )
+
+        # BOTONES INFERIORES
+
+        botones = tk.Frame(
+            panel,
+            bg="white"
+        )
+
+        botones.pack(
+            fill="x",
+            padx=20,
+            pady=15
+        )
+
+        # Regresar al menú principal
+        tk.Button(
+            botones,
+            text="Regresar al menú principal",
+            command=mostrar_inicio,
+            width=25,
+            bg="#E8EEF5",
+            fg="#1F4E79",
+            relief="flat",
+            font=("Arial", 10),
+            cursor="hand2"
+        ).pack(side="left")
+
+        # Insertar registro
+        tk.Button(
+            botones,
+            text="Insertar registro",
+            command=lambda: abrir_ventana_insertar(
+                ventana,
+                conexion,
+                nombre,
+                actualizar
+            ),
+            width=20,
+            bg="#1F4E79",
+            fg="white",
+            relief="flat",
+            font=("Arial", 10, "bold"),
+            cursor="hand2"
+        ).pack(side="right")
+
+        # Cargar registros
+        actualizar()
+
+    # CARGAR TABLAS
+
     try:
+
         tablas = obtener_tablas(conexion)
 
         if not tablas:
+
             tk.Label(
-                frame_botones_menu,
-                text="No hay tablas disponibles en la base de datos.",
-                fg="#777777"
+                contenedor_botones,
+                text="No hay tablas disponibles",
+                bg="white",
+                fg="gray",
+                font=("Arial", 9)
             ).pack(pady=10)
 
         for fila in tablas:
+
             nombre = fila[0]
+
             tk.Button(
-                frame_botones_menu,
+                contenedor_botones,
                 text=nombre.capitalize(),
-                width=26,
+                command=lambda n=nombre: seleccionar_tabla(n),
+                width=21,
                 height=2,
-                font=("Arial", 11),
-                command=lambda n=nombre: seleccionar_seccion(n)
-            ).pack(pady=6)
+                bg="#E8EEF5",
+                fg="#333333",
+                activebackground="#D0DFEF",
+                relief="flat",
+                font=("Arial", 10),
+                cursor="hand2"
+            ).pack(pady=5, padx=5)
 
     except Exception as error:
+
         messagebox.showerror(
             "Error",
-            "No se pudieron obtener las secciones.\n\n" + str(error)
+            "No se pudieron obtener las tablas.\n\n" + str(error)
         )
+
+    mostrar_inicio()
