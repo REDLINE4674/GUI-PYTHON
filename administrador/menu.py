@@ -9,10 +9,18 @@ from consultas import mostrar_datos
 from insertar import abrir_ventana_insertar
 
 
-def mostrar_menu(ventana, conexion, usuario):
+def mostrar_menu(ventana, conexion, usuario, rol):
 
     ventana.title("Nucleo De Diagnostico")
     ventana.configure(bg="#F0F2F5")
+
+    es_administrador = str(rol) == "1"
+    es_usuario_normal = str(rol) == "2"
+    perfil = "Administrador" if es_administrador else "Usuario normal" if es_usuario_normal else "Rol no definido"
+
+    def es_tabla_pacientes(nombre_tabla):
+        nombre_normalizado = str(nombre_tabla).strip().lower()
+        return nombre_normalizado in ("paciente", "pacientes")
 
     # CONTENEDOR PRINCIPAL
 
@@ -146,6 +154,14 @@ def mostrar_menu(ventana, conexion, usuario):
             fg="#333333"
         ).pack(pady=10)
 
+        tk.Label(
+            inicio,
+            text=f"Perfil: {perfil}",
+            font=("Arial", 11, "bold"),
+            bg="white",
+            fg="#1F4E79"
+        ).pack(pady=(0, 10))
+
         # Mensaje de bienvenida
         tk.Label(
             inicio,
@@ -166,6 +182,14 @@ def mostrar_menu(ventana, conexion, usuario):
     # VISTA DE TABLAS
 
     def seleccionar_tabla(nombre):
+
+        if es_usuario_normal and not es_tabla_pacientes(nombre):
+            messagebox.showwarning(
+                "Acceso restringido",
+                "Tu perfil solo puede consultar la tabla de pacientes.",
+                parent=ventana
+            )
+            return
 
         tabla_seleccionada["nombre"] = nombre
 
@@ -193,80 +217,77 @@ def mostrar_menu(ventana, conexion, usuario):
 
         titulo_tabla.pack(side="left")
 
-        # Contenedor de registros
-        contenedor_tabla = tk.Frame(
-            panel,
-            bg="white"
+        contador_registros = tk.Label(
+            encabezado_tabla,
+            text="Registros encontrados: 0",
+            font=("Arial", 10, "bold"),
+            bg="white",
+            fg="#666666"
         )
+        contador_registros.pack(side="right")
 
-        contenedor_tabla.pack(
-            fill="both",
-            expand=True,
-            padx=20,
-            pady=10
-        )
-
-        # Tabla visual
-        tabla_visual = ttk.Treeview(
-            contenedor_tabla,
-            show="headings"
-        )
-
-        # Barra vertical
-        scroll_vertical = ttk.Scrollbar(
-            contenedor_tabla,
-            orient="vertical",
-            command=tabla_visual.yview
-        )
-
-        # Barra horizontal
-        scroll_horizontal = ttk.Scrollbar(
-            contenedor_tabla,
-            orient="horizontal",
-            command=tabla_visual.xview
-        )
-
-        tabla_visual.configure(
-            yscrollcommand=scroll_vertical.set,
-            xscrollcommand=scroll_horizontal.set
-        )
-
-        # Distribución de la tabla
-        tabla_visual.grid(
-            row=0,
-            column=0,
-            sticky="nsew"
-        )
-
-        scroll_vertical.grid(
-            row=0,
-            column=1,
-            sticky="ns"
-        )
-
-        scroll_horizontal.grid(
-            row=1,
-            column=0,
-            sticky="ew"
-        )
-
-        contenedor_tabla.grid_rowconfigure(0, weight=1)
-        contenedor_tabla.grid_columnconfigure(0, weight=1)
+        vista_registros = {"tabla": None}
 
         # ACTUALIZAR REGISTROS
 
-        def actualizar():
+        def actualizar(mostrar_si_oculto=True):
 
             nombre_actual = tabla_seleccionada["nombre"]
 
             if nombre_actual is not None:
+                if vista_registros["tabla"] is None:
+                    if not mostrar_si_oculto:
+                        return 0
 
-                mostrar_datos(
+                    contenedor_tabla = tk.Frame(
+                        panel,
+                        bg="white"
+                    )
+
+                    contenedor_tabla.pack(
+                        fill="both",
+                        expand=True,
+                        padx=20,
+                        pady=10
+                    )
+
+                    tabla_visual = ttk.Treeview(
+                        contenedor_tabla,
+                        show="headings"
+                    )
+                    scroll_vertical = ttk.Scrollbar(
+                        contenedor_tabla,
+                        orient="vertical",
+                        command=tabla_visual.yview
+                    )
+                    scroll_horizontal = ttk.Scrollbar(
+                        contenedor_tabla,
+                        orient="horizontal",
+                        command=tabla_visual.xview
+                    )
+
+                    tabla_visual.configure(
+                        yscrollcommand=scroll_vertical.set,
+                        xscrollcommand=scroll_horizontal.set
+                    )
+                    tabla_visual.grid(row=0, column=0, sticky="nsew")
+                    scroll_vertical.grid(row=0, column=1, sticky="ns")
+                    scroll_horizontal.grid(row=1, column=0, sticky="ew")
+                    contenedor_tabla.grid_rowconfigure(0, weight=1)
+                    contenedor_tabla.grid_columnconfigure(0, weight=1)
+                    vista_registros["tabla"] = tabla_visual
+
+                cantidad = mostrar_datos(
                     conexion,
-                    tabla_visual,
+                    vista_registros["tabla"],
                     titulo_tabla,
                     nombre_actual
                 )
+                contador_registros.config(
+                    text=f"Registros encontrados: {cantidad}"
+                )
+                return cantidad
+            return 0
 
         # BOTONES INFERIORES
 
@@ -294,26 +315,36 @@ def mostrar_menu(ventana, conexion, usuario):
             cursor="hand2"
         ).pack(side="left")
 
-        # Insertar registro
         tk.Button(
             botones,
-            text="Insertar registro",
-            command=lambda: abrir_ventana_insertar(
-                ventana,
-                conexion,
-                nombre,
-                actualizar
-            ),
+            text="Consultar registros",
+            command=actualizar,
             width=20,
-            bg="#1F4E79",
+            bg="#5A8FC4",
             fg="white",
             relief="flat",
             font=("Arial", 10, "bold"),
             cursor="hand2"
-        ).pack(side="right")
+        ).pack(side="left", padx=5)
 
-        # Cargar registros
-        actualizar()
+        # Insertar registro
+        if es_administrador:
+            tk.Button(
+                botones,
+                text="Insertar registro",
+                command=lambda: abrir_ventana_insertar(
+                    ventana,
+                    conexion,
+                    nombre,
+                    lambda: actualizar(mostrar_si_oculto=False)
+                ),
+                width=20,
+                bg="#1F4E79",
+                fg="white",
+                relief="flat",
+                font=("Arial", 10, "bold"),
+                cursor="hand2"
+            ).pack(side="right")
 
     # CARGAR TABLAS
 
@@ -334,6 +365,9 @@ def mostrar_menu(ventana, conexion, usuario):
         for fila in tablas:
 
             nombre = fila[0]
+
+            if es_usuario_normal and not es_tabla_pacientes(nombre):
+                continue
 
             tk.Button(
                 contenedor_botones,

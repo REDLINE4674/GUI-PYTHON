@@ -10,12 +10,13 @@ ventana.geometry("900x500")
 
 
 # Abrir el menú después de iniciar sesión
-def iniciar_aplicacion(conexion, usuario):
+def iniciar_aplicacion(conexion, usuario, rol):
 
     mostrar_menu(
         ventana,
         conexion,
-        usuario
+        usuario,
+        rol
     )
 
 
@@ -34,7 +35,7 @@ conexion_actual = None
 
 
 # Recibir conexión desde el login
-def conexion_exitosa(conexion, usuario):
+def conexion_exitosa(conexion, usuario, rol):
 
     global conexion_actual
 
@@ -42,7 +43,8 @@ def conexion_exitosa(conexion, usuario):
 
     iniciar_aplicacion(
         conexion,
-        usuario
+        usuario,
+        rol
     )
 
 

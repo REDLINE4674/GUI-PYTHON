@@ -1,8 +1,8 @@
-
 import tkinter as tk
-from tkinter import ttk, messagebox
-from conexion import conectar
+from tkinter import messagebox
+import psycopg2
 
+from conexion import conectar, consulta_usuarios
 
 def mostrar_login(ventana, al_conectar):
 
@@ -115,9 +115,7 @@ def mostrar_login(ventana, al_conectar):
         pady=(5, 20),
         ipady=6
     )
-
     def iniciar_sesion():
-
         usuario = caja_usuario.get().strip()
         password = caja_password.get()
 
@@ -129,29 +127,38 @@ def mostrar_login(ventana, al_conectar):
             )
             return
 
+        conexion = None
         try:
-
-            conexion = conectar(usuario, password)
-
-            messagebox.showinfo(
-                "Conexión exitosa",
-                "Bienvenido " + usuario,
-                parent=ventana
-            )
-
-            login.destroy()
-
-            al_conectar(conexion, usuario)
-
-        except Exception as error:
-
+            conexion = conectar()
+            usuario_valido = consulta_usuarios(conexion, usuario, password)
+        except psycopg2.Error:
+            if conexion is not None:
+                conexion.close()
             messagebox.showerror(
                 "Error de conexión",
-                "No se pudo conectar con PostgreSQL.\n\n"
-                "Verifica tu usuario y contraseña.\n\n"
-                "Detalle: " + str(error),
+                "No se pudo conectar con la base de datos.",
                 parent=ventana
             )
+            return
+
+        if not usuario_valido:
+            conexion.close()
+            messagebox.showerror(
+                "Error de inicio de sesión",
+                "Usuario o contraseña incorrectos.",
+                parent=ventana
+            )
+            return
+
+        nombre_usuario, rol = usuario_valido
+        perfil = "Administrador" if str(rol) == "1" else "Usuario normal" if str(rol) == "2" else "Rol no definido"
+        messagebox.showinfo(
+            "Inicio de sesión exitoso",
+            f"Bienvenido, {nombre_usuario}!\nPerfil: {perfil}",
+            parent=ventana
+        )
+        login.destroy()
+        al_conectar(conexion, nombre_usuario, rol)
 
     def cancelar():
 

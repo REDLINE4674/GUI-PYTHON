@@ -6,10 +6,11 @@ Aplicación de escritorio desarrollada en Python con Tkinter para conectarse a u
 
 Este proyecto permite:
 
-- Iniciar sesión con usuario y contraseña de PostgreSQL.
+- Iniciar sesión con las credenciales guardadas en la tabla `usuarios`.
+- Asignar acceso según el rol del usuario.
 - Conectarse a una base de datos local o remota.
 - Listar las tablas públicas disponibles.
-- Consultar todos los registros de una tabla seleccionada.
+- Consultar los registros de una tabla seleccionada bajo demanda.
 - Mostrar los datos en una interfaz gráfica.
 - Insertar nuevas filas en tablas seleccionadas mediante formularios generados automáticamente.
 
@@ -105,14 +106,24 @@ Desde la raíz del proyecto:
 python administrador/main.py
 ```
 
-La aplicación abrirá una ventana de inicio de sesión. Ingresando usuario y contraseña válidos, se conectará a PostgreSQL y mostrará el menú principal.
+La aplicación abrirá una ventana de inicio de sesión. Al validar el usuario en la tabla `usuarios`, obtiene su nombre y rol, y luego muestra el menú permitido para ese perfil.
 
 ## Uso
 
-1. Ingresa usuario y contraseña.
-2. Selecciona una tabla desde el menú lateral.
-3. Revisa los registros en la vista principal.
-4. Haz clic en "Insertar tupla" para agregar un nuevo registro.
+1. Ingresa tu nombre de usuario y contraseña.
+2. Selecciona una tabla del menú lateral.
+3. Pulsa **Consultar registros** para cargar los datos y ver el total encontrado. La tabla no aparece hasta solicitar la consulta.
+4. Si tienes rol de administrador, pulsa **Insertar registro** para agregar una fila.
+5. Pulsa **Regresar al menú principal** para volver a la pantalla de inicio.
+
+### Perfiles
+
+La tabla `usuarios` debe tener las columnas `nombre`, `contrasena` y `rol`.
+
+- `rol = 1`: administrador. Puede consultar todas las tablas públicas disponibles y tiene habilitada la inserción de registros.
+- `rol = 2`: usuario normal. Solo puede consultar la tabla `pacientes` (o `paciente`, si así se llama en la base de datos); no tiene habilitada la inserción.
+
+La aplicación actualmente no ofrece operaciones para editar o eliminar registros.
 
 ## Notas importantes
 
@@ -120,6 +131,7 @@ La aplicación abrirá una ventana de inicio de sesión. Ingresando usuario y co
 - Los datos se muestran en una tabla visual de Tkinter.
 - La lógica de inserción evita columnas generadas o de identidad, según la consulta SQL utilizada.
 - La base de datos debe estar disponible antes de ejecutar la aplicación.
+- La configuración de conexión a PostgreSQL se encuentra en `administrador/conexion.py`.
 
 ## Posibles mejoras futuras
 

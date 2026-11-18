@@ -40,6 +40,7 @@ def mostrar_datos(conexion, tabla_visual, titulo, nombre_tabla):
                 "end",
                 values=registro
             )
+        return len(registros)
 
     except Exception as error:
 
@@ -47,3 +48,4 @@ def mostrar_datos(conexion, tabla_visual, titulo, nombre_tabla):
             "Error",
             "No se pudieron consultar los registros.\n\n" + str(error)
         )
+        return 0

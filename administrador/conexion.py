@@ -6,16 +6,17 @@ from psycopg2 import sql
 HOST = "localhost"
 DATABASE = "NucleoDeDiagnostico"
 PORT = "5433"
-
+USUARIO = "admin"
+PASSWORD = "1234"
 
 # Conectar a PostgreSQL
-def conectar(usuario, password):
+def conectar():
 
     conexion = psycopg2.connect(
         host=HOST,
         database=DATABASE,
-        user=usuario,
-        password=password,
+        user=USUARIO,
+        password=PASSWORD,
         port=PORT
     )
 
@@ -83,6 +84,17 @@ def obtener_columnas(conexion, nombre_tabla):
 
     return columnas
 
+def consulta_usuarios(conexion, nombre, contrasena):
+    cursor = conexion.cursor()
+    try:
+        cursor.execute("""
+            SELECT nombre, rol
+            FROM usuarios
+            WHERE nombre = %s AND contrasena = %s
+        """, (nombre, contrasena))
+        return cursor.fetchone()
+    finally:
+        cursor.close()
 
 # Insertar un registro
 def insertar_registro(conexion, nombre_tabla, nombres, valores):
