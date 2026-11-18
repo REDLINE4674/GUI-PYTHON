@@ -9,7 +9,7 @@ def mostrar_menu(ventana, conexion, usuario):
 
     # Tamaños independientes para el menú y para la vista de cada sección
     TAMANO_MENU = "460x450"
-    TAMANO_SECCION = "950x550"
+    TAMANO_SECCION = "950x650"
 
     # Aplicar tamaño exclusivo de la ventana del menú
     ventana.geometry(TAMANO_MENU)
