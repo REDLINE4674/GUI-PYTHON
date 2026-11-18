@@ -2,13 +2,11 @@ import tkinter as tk
 from login import mostrar_login
 from menu import mostrar_menu
 
-
 # Crear ventana principal
 ventana = tk.Tk()
 
 ventana.title("Administrador PostgreSQL")
 ventana.geometry("900x500")
-
 
 # Abrir el menú después de iniciar sesión
 def iniciar_aplicacion(conexion, usuario):
@@ -19,7 +17,6 @@ def iniciar_aplicacion(conexion, usuario):
         usuario
     )
 
-
 # Cerrar la aplicación
 def cerrar_aplicacion():
 
@@ -29,10 +26,8 @@ def cerrar_aplicacion():
 
     ventana.destroy()
 
-
 # Variable para guardar la conexión
 conexion_actual = None
-
 
 # Recibir conexión desde el login
 def conexion_exitosa(conexion, usuario):
@@ -46,20 +41,17 @@ def conexion_exitosa(conexion, usuario):
         usuario
     )
 
-
 # Configurar cierre de ventana
 ventana.protocol(
     "WM_DELETE_WINDOW",
     cerrar_aplicacion
 )
 
-
 # Mostrar pantalla de inicio de sesión
 mostrar_login(
     ventana,
     conexion_exitosa
 )
-
 
 # Ejecutar aplicación
 ventana.mainloop()
